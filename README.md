@@ -81,12 +81,12 @@ All per-condition numbers: [`results/summary.csv`](results/summary.csv) and [`re
 
 - **Compare at equal labeling cost.** An early version of my results compared a 20-round bandit run against an 8-round fixed run, which made the bandit look 13 points better. At matched label counts the gap disappears.
 - **Reward scale matters for UCB.** Raw rewards (~0.003 accuracy per label) were tiny next to UCB's exploration bonus (~1), so the original agent just cycled through the arms. Scaling the reward and crediting each arm with the gain of *its own* batch, measured on validation rather than test data, fixed this.
-- **Check that your safeguard has something to guard.** In our PER sample every clip comes from a different recording, so the recording split and Top-K Entropy reduce to their plain versions there. The [demo](#run-the-demo) uses multi-clip recordings to show where they matter: a clip-level split scores **99.5%** vs **85.7%** for a recording split on the same data.
+- **Check that your safeguard has something to guard.** In our PER sample every clip comes from a different recording, so the recording split and Top-K Entropy reduce to their plain versions there. The [demo](#run-the-demo) uses multi-clip recordings to show where they matter: a clip-level split scores **~99%** vs **~84–86%** for a recording split on the same data.
 - **Seeds and versions matter.** The same config gave results about 4 points apart across scikit-learn versions, so I report means over seeds and pin versions.
 
 ## Run the demo
 
-The demo uses synthetic embeddings with a recording structure (species signal + per-recording "background" + clip noise), so it runs anywhere in about a minute.
+The demo uses synthetic embeddings with a recording structure (species signal + per-recording "background" + clip noise), so it runs anywhere in 1–2 minutes.
 
 ```bash
 git clone https://github.com/laura06919-max/adaptive-budget-active-learning.git
@@ -96,7 +96,9 @@ pip install -r requirements.txt
 python demo/run_demo.py --plot
 ```
 
-It prints (1) clip-level vs recording-level split accuracy, (2) random / entropy / margin / Top-K entropy, and (3) fixed budgets vs the UCB bandit at matched label counts. With `--plot` it also saves `demo/demo_curves.png`.
+It prints (1) clip-level vs recording-level split accuracy, (2) random / entropy / margin / Top-K entropy, and (3) fixed budgets vs the UCB bandit at matched label counts, each as mean ± SD over 5 seeds. With `--plot` it also saves `demo/demo_curves.png`.
+
+The leakage gap in (1) is large and stable. Sections (2) and (3) are there to show the components working end to end; on this small synthetic set their differences are mostly within one SD and shift a little across machines, so the real-data results above are the ones to cite.
 
 Use the bandit in your own loop:
 
